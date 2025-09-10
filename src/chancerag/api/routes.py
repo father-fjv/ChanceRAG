@@ -219,6 +219,101 @@ async def get_system_stats(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/faq/questions")
+async def get_faq_questions(count: int = 4):
+    """
+    Get random FAQ questions.
+    
+    Args:
+        count: Number of questions to return (default: 4)
+        
+    Returns:
+        List of random FAQ questions
+    """
+    try:
+        # Import FAQ questions
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        from faq_questions import get_random_questions
+        
+        questions = get_random_questions(count)
+        return {
+            "questions": questions,
+            "count": len(questions)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting FAQ questions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/faq/related")
+async def get_related_questions(
+    request: QueryRequest,
+    rag_system: RAGSystem = Depends(get_rag_system)
+):
+    """
+    Get related questions based on current query.
+    
+    Args:
+        request: Query request
+        rag_system: RAG system dependency
+        
+    Returns:
+        List of related questions
+    """
+    try:
+        # Import FAQ questions
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        from faq_questions import get_all_questions
+        
+        all_questions = get_all_questions()
+        
+        # Use vector store to find similar questions
+        vector_store = rag_system.get_vector_store()
+        
+        # Create temporary documents for FAQ questions
+        from langchain.schema import Document
+        faq_docs = [Document(page_content=q, metadata={"type": "faq_question"}) for q in all_questions]
+        
+        # Find similar questions
+        similar_docs = await vector_store.similarity_search(
+            query=request.question,
+            k=3,
+            score_threshold=0.3
+        )
+        
+        # Extract questions from similar documents
+        related_questions = []
+        for doc, score in similar_docs:
+            if doc.metadata.get("type") == "faq_question":
+                related_questions.append(doc.page_content)
+        
+        # If not enough FAQ questions found, add some random ones
+        if len(related_questions) < 3:
+            import random
+            remaining_needed = 3 - len(related_questions)
+            available_questions = [q for q in all_questions if q not in related_questions]
+            if available_questions:
+                additional_questions = random.sample(
+                    available_questions, 
+                    min(remaining_needed, len(available_questions))
+                )
+                related_questions.extend(additional_questions)
+        
+        return {
+            "related_questions": related_questions[:3],
+            "count": len(related_questions[:3])
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting related questions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.delete("/documents/{filename}")
 async def delete_document(
     filename: str,

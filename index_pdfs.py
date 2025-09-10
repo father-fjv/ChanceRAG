@@ -4,6 +4,10 @@
 import sys
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add src to Python path
 src_path = Path(__file__).parent / "src"
@@ -16,7 +20,7 @@ async def index_pdfs():
         from chancerag.config import get_settings
         from chancerag.core.document_processor import DocumentProcessor
         from chancerag.core.vector_store import FAISSVectorStore
-        from chancerag.api.dependencies import get_rag_system
+        from chancerag.api.dependencies import RAGSystem
         
         print("🔍 PDF 파일 인덱싱 시작...")
         
@@ -41,7 +45,8 @@ async def index_pdfs():
         
         # Initialize RAG system
         print("🚀 RAG 시스템 초기화 중...")
-        rag_system = await get_rag_system().__anext__()
+        rag_system = RAGSystem()
+        await rag_system.initialize()
         
         # Get components
         document_processor = rag_system.get_document_processor()
@@ -53,11 +58,11 @@ async def index_pdfs():
             
             try:
                 # Load and process document
-                documents = document_processor.load_pdf(str(pdf_file))
+                documents = await document_processor.process_pdf(str(pdf_file))
                 print(f"  ✓ 문서 로드 완료: {len(documents)}개 청크")
                 
                 # Add to vector store
-                vector_store.add_documents(documents)
+                await vector_store.add_documents(documents)
                 print(f"  ✓ 벡터 저장소에 추가 완료")
                 
             except Exception as e:
@@ -66,7 +71,7 @@ async def index_pdfs():
         
         # Save vector store
         print("\n💾 벡터 저장소 저장 중...")
-        vector_store.save()
+        vector_store.save_index()
         print("✅ 인덱싱 완료!")
         
         # Show statistics

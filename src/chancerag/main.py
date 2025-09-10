@@ -52,108 +52,26 @@ if static_path.exists():
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     """Serve main page."""
-    html_content = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>ChanceRAG - KOICA 해외봉사단 규정 상담 챗봇</title>
-        <meta charset="utf-8">
-        <style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f5f5f5;
-            }
-            .container {
-                background: white;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            h1 {
-                color: #333;
-                text-align: center;
-                margin-bottom: 30px;
-            }
-            .description {
-                color: #666;
-                line-height: 1.6;
-                margin-bottom: 30px;
-            }
-            .api-links {
-                display: flex;
-                gap: 20px;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            .api-link {
-                display: inline-block;
-                padding: 12px 24px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                transition: background-color 0.3s;
-            }
-            .api-link:hover {
-                background-color: #0056b3;
-            }
-            .features {
-                margin-top: 40px;
-            }
-            .feature {
-                margin-bottom: 20px;
-                padding: 15px;
-                background-color: #f8f9fa;
-                border-radius: 5px;
-            }
-            .feature h3 {
-                margin-top: 0;
-                color: #333;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🤖 ChanceRAG</h1>
-            <p class="description">
-                사내 직원이 규정을 빠르게 찾아보고 이해할 수 있도록, PDF 규정을 RAG로 검색·답변해 주는 웹 기반 챗봇입니다.
-            </p>
-            
-            <div class="api-links">
-                <a href="/docs" class="api-link">📚 API 문서</a>
-                <a href="/redoc" class="api-link">📖 ReDoc</a>
-                <a href="/api/v1/health" class="api-link">💚 상태 확인</a>
-            </div>
-            
-            <div class="features">
-                <div class="feature">
-                    <h3>🔍 지능형 검색</h3>
-                    <p>FAISS 벡터 데이터베이스를 활용한 의미적 문서 검색으로 정확한 규정 조항을 찾아드립니다.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>🤖 AI 답변 생성</h3>
-                    <p>OpenAI GPT-4를 활용하여 복잡한 규정을 이해하기 쉬운 언어로 설명해드립니다.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>🇰🇷 한국어 최적화</h3>
-                    <p>Kiwi 형태소 분석기를 활용한 한국어 텍스트 처리로 더 정확한 검색 결과를 제공합니다.</p>
-                </div>
-                
-                <div class="feature">
-                    <h3>⚡ 실시간 스트리밍</h3>
-                    <p>답변을 실시간으로 스트리밍하여 빠른 응답 속도를 제공합니다.</p>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
+    # Serve the static HTML file
+    static_path = Path(__file__).parent / "static" / "index.html"
+    if static_path.exists():
+        return HTMLResponse(content=static_path.read_text(encoding="utf-8"))
+    else:
+        # Fallback to simple HTML if static file doesn't exist
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>ChanceRAG - KOICA 해외봉사단 규정 상담 챗봇</title>
+            <meta charset="utf-8">
+        </head>
+        <body>
+            <h1>ChanceRAG</h1>
+            <p>웹 인터페이스를 로드하는 중...</p>
+            <p><a href="/docs">API 문서</a></p>
+        </body>
+        </html>
+        """)
 
 
 @app.on_event("startup")

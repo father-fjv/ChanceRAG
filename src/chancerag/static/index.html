@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-title" content="KOICA-해외봉사단규정">
+    <meta name="description" content="KOICA 해외봉사단 규정 상담 챗봇">
+    <meta name="keywords" content="KOICA, 해외봉사단, 규정, 상담, 챗봇">
+    <meta name="generator" content="ChanceRAG">
+    
+    <title>KOICA 해외봉사단 규정 상담</title>
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-bs-theme="light" data-color-mode="light">
+    <div id="root">
+        <div class="kn-llm-container index">
+            <!-- Header -->
+            <header>
+                <div class="kn-llm-header-icon">
+                    <button id="menuButton" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="kn-llm-header-left">
+                    <img class="kn-llm-logo-koica" alt="KOICA 로고" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'><rect width='200' height='60' fill='%230066CC'/><text x='100' y='35' text-anchor='middle' fill='white' font-family='Arial' font-size='16' font-weight='bold'>KOICA</text></svg>">
+                </div>
+                <div class="kn-llm-header-center">
+                    <div class="kn-llm-menu-container">
+                        <div class="kn-llm-menu">
+                            <div class="kn-llm-menu-header">
+                                <span>메뉴</span>
+                                <button id="closeButton" type="button">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div class="kn-llm-menu-body">
+                                <div class="kn-llm-menu-tab">
+                                    <a class="kn-llm-menu-tab-item active">해외봉사단규정</a>
+                                    <a class="kn-llm-menu-tab-item">조달계약규정</a>
+                                    <a class="kn-llm-menu-tab-item">인사규정</a>
+                                    <a class="kn-llm-menu-tab-item">제안요청서</a>
+                                </div>
+                                <div class="kn-llm-menu-banner">
+                                    <button type="button" class="kn-llm-banner">
+                                        <img class="kn-llm-banner-img-pc" alt="배너 PC" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 100'><rect width='400' height='100' fill='%23f8f9fa'/><text x='200' y='55' text-anchor='middle' fill='%23333' font-family='Arial' font-size='14'>KOICA 해외봉사단 규정 상담</text></svg>">
+                                        <img class="kn-llm-banner-img-mo" alt="배너 모바일" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 80'><rect width='300' height='80' fill='%23f8f9fa'/><text x='150' y='45' text-anchor='middle' fill='%23333' font-family='Arial' font-size='12'>KOICA 해외봉사단</text></svg>">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="kn-llm-menu-footer">
+                                <span>밝기 모드</span>
+                                <input role="switch" id="switchMode" class="kn-llm-dark-switch" type="checkbox">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kn-llm-header-right">
+                    <img class="kn-llm-logo-konan" alt="ChanceRAG 로고" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'><rect width='100' height='40' fill='%23667eea'/><text x='50' y='25' text-anchor='middle' fill='white' font-family='Arial' font-size='10' font-weight='bold'>ChanceRAG</text></svg>">
+                </div>
+            </header>
+
+            <!-- Main Container -->
+            <main>
+                <div class="kn-llm-main-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will be displayed here -->
+                    </div>
+                    
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                        <div class="message bot-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="typing-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="kn-llm-footer">
+                <div>
+                    <div class="kn-llm-message">
+                        <span><span>해외봉사단규정</span>에 관한</span> 
+                        <span>질문을 입력해주세요.</span>
+                    </div>
+                    <div class="kn-llm-search">
+                        <textarea id="chatText" placeholder="해외봉사단규정에 관한 질문을 입력해주세요" rows="1" wrap="soft"></textarea>
+                        <button class="kn-llm-btn-send" id="sendButton" disabled="">
+                            <img alt="보내기" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M2.01 21L23 12 2.01 3 2 10l15 2-15 2z'/></svg>">
+                        </button>
+                    </div>
+                    <div class="kn-llm-example">
+                        <i class="bi bi-info-circle"></i>
+                        본 서비스는 AI 시범 서비스이므로, 사용 전 사실 확인을 권장합니다.
+                    </div>
+                    <div class="kn-llm-related">
+                        <h4>예시 질문</h4>
+                        <div class="kn-llm-related-body" id="faqGrid">
+                            <!-- FAQ questions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-gear"></i> 고급 설정
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="topK" class="form-label">검색할 문서 수 (Top-K)</label>
+                        <input type="range" class="form-range" id="topK" min="1" max="10" value="3">
+                        <div class="form-text">현재 값: <span id="topKValue">3</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="scoreThreshold" class="form-label">유사도 임계값</label>
+                        <input type="range" class="form-range" id="scoreThreshold" min="0" max="1" step="0.1" value="0.3">
+                        <div class="form-text">현재 값: <span id="scoreThresholdValue">0.3</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeSources" checked>
+                            <label class="form-check-label" for="includeSources">
+                                출처 정보 포함
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" id="saveSettings">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div class="modal" id="statsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-bar-chart"></i> 시스템 상태
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="statsContent">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">로딩 중...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="/static/script.js"></script>
+</body>
+</html>

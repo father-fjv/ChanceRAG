@@ -45,7 +45,7 @@ class RAGGenerator:
             model_name=model_name,
             temperature=temperature,
             max_tokens=max_tokens,
-            streaming=True,
+            streaming=False,  # Disable streaming to avoid organization verification issues
         )
         
         # Korean-optimized system prompt
@@ -166,6 +166,14 @@ class RAGGenerator:
         """
         try:
             logger.info(f"Generating streaming answer for question: {question}")
+            
+            # If streaming is disabled, fall back to regular answer generation
+            if not self.llm.streaming:
+                logger.info("Streaming disabled, falling back to regular answer generation")
+                result = await self.generate_answer(question, top_k, score_threshold)
+                # Simulate streaming by yielding the complete answer
+                yield result["answer"]
+                return
             
             # Retrieve relevant documents
             results = await self.retriever.retrieve(

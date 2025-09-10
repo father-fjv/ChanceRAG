@@ -25,7 +25,7 @@ class FAISSVectorStore:
         embedding_model: str = "text-embedding-ada-002",
         use_openai: bool = True,
         index_path: Optional[str] = None,
-        dimension: int = 1536,  # OpenAI ada-002 dimension
+        dimension: Optional[int] = None,  # Will be auto-detected
     ):
         """
         Initialize FAISS vector store.
@@ -34,28 +34,34 @@ class FAISSVectorStore:
             embedding_model: Name of embedding model
             use_openai: Whether to use OpenAI embeddings
             index_path: Path to save/load FAISS index
-            dimension: Embedding dimension
+            dimension: Embedding dimension (auto-detected if None)
         """
         self.embedding_model = embedding_model
         self.use_openai = use_openai
         self.index_path = index_path
-        self.dimension = dimension
         
-        # Initialize embedding model
+        # Initialize embedding model and get actual dimension
         if use_openai:
             self.embeddings = OpenAIEmbeddings(
                 model=embedding_model,
                 chunk_size=1000,
             )
+            # OpenAI ada-002 has 3072 dimensions
+            self.dimension = 3072
         else:
-            # Use Korean-optimized sentence transformer
+            # Use specified sentence transformer model
             self.embeddings = SentenceTransformer(
-                "jhgan/ko-sroberta-multitask",
+                embedding_model,
                 device="cpu"
             )
+            # Get actual dimension from the model
             self.dimension = self.embeddings.get_sentence_embedding_dimension()
         
-        # Initialize FAISS index
+        # Override dimension if explicitly provided
+        if dimension is not None:
+            self.dimension = dimension
+        
+        # Initialize FAISS index with correct dimension
         self.index = faiss.IndexFlatIP(self.dimension)  # Inner product for cosine similarity
         self.documents: List[Document] = []
         self.metadata: List[Dict[str, Any]] = []
@@ -64,7 +70,7 @@ class FAISSVectorStore:
         self.korean_tokenizer = KoreanTokenizer()
         
         # Load existing index if path provided
-        if index_path and Path(index_path).exists():
+        if index_path and Path(index_path).exists() and (Path(index_path) / "faiss.index").exists():
             self.load_index()
     
     async def add_documents(self, documents: List[Document]) -> None:
@@ -87,6 +93,8 @@ class FAISSVectorStore:
             
         except Exception as e:
             logger.error(f"Error adding documents: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             raise
     
     async def _add_batch(self, documents: List[Document]) -> None:
@@ -107,6 +115,9 @@ class FAISSVectorStore:
             else:
                 embeddings = await self._get_sentence_transformer_embeddings(processed_texts)
             
+            # Debug: Print embedding dimensions
+            logger.info(f"Generated embeddings shape: {embeddings.shape}, expected dimension: {self.dimension}")
+            
             # Normalize embeddings for cosine similarity
             embeddings = self._normalize_embeddings(embeddings)
             
@@ -124,6 +135,8 @@ class FAISSVectorStore:
             
         except Exception as e:
             logger.error(f"Error adding batch: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             raise
     
     async def _preprocess_korean_texts(self, texts: List[str]) -> List[str]:
@@ -275,7 +288,7 @@ class FAISSVectorStore:
                 raise ValueError("No path provided for saving index")
             
             save_path = Path(save_path)
-            save_path.parent.mkdir(parents=True, exist_ok=True)
+            save_path.mkdir(parents=True, exist_ok=True)
             
             # Save FAISS index
             faiss.write_index(self.index, str(save_path / "faiss.index"))
